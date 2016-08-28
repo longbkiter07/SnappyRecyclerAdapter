@@ -117,11 +117,23 @@ public abstract class FastRecyclerViewAdapter<D, VH extends RecyclerView.ViewHol
   }
 
   public Observable<Void> setItems(List<D> items) {
-    return submitBehavior(new Behavior<D>(items, Action.SET));
+    if (mRecyclerList.size() == 0) {
+      return Observable.<Void>create(subscriber -> {
+        mRecyclerList.setItems(items);
+        notifyDataSetChanged();
+        Utils.onNext(subscriber, null, true);
+      }).subscribeOn(AndroidSchedulers.mainThread());
+    } else {
+      return submitBehavior(new Behavior<D>(items, Action.SET));
+    }
   }
 
   public Observable<Void> update(int position, D item) {
     return submitBehavior(new Behavior<D>(item, position, Action.UPDATE));
+  }
+
+  public D getItemAt(int pos) {
+    return mRecyclerList.getItemAt(pos);
   }
 
   @Override

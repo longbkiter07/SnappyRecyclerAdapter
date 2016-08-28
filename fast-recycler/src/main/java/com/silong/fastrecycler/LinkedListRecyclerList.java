@@ -1,5 +1,7 @@
 package com.silong.fastrecycler;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.ListIterator;
  * Created by SILONG on 8/27/16.
  */
 public class LinkedListRecyclerList<D> implements RecyclerList<D> {
+
+  private static final String TAG = LinkedListRecyclerList.class.getSimpleName();
 
   private List<D> mItems;
 
@@ -23,11 +27,12 @@ public class LinkedListRecyclerList<D> implements RecyclerList<D> {
 
   private boolean moveBefore(ListIterator<D> listIterator, int pos) {
     int nextIndex = listIterator.nextIndex();
+    Log.d(TAG, "moving:" + nextIndex + " to pos:" + pos + ", size:" + mItems.size());
     if (nextIndex <= pos) {
-      do {
+      while (nextIndex < pos){
         listIterator.next();
         nextIndex = listIterator.nextIndex();
-      } while (nextIndex < pos);
+      }
       return true;
     } else {
       do {
