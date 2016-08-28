@@ -117,7 +117,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
         if (mRegularRecyclerViewArapter != null) {
           mRegularRecyclerViewArapter.remove((int) (Math.random() * mRegularRecyclerViewArapter.getItemCount() - 1));
         } else {
-          mFastUserRecyclerViewAdapter.remove((int) (Math.random() * mRegularRecyclerViewArapter.getItemCount() - 1)).subscribe();
+          mFastUserRecyclerViewAdapter.remove((int) (Math.random() * mFastUserRecyclerViewAdapter.getItemCount() - 1)).subscribe();
         }
         break;
       case R.id.action_set_items:

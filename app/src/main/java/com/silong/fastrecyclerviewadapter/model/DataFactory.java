@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class DataFactory {
 
-  public static final int CHUNK = 1000;
+  public static final int CHUNK = 100000;
 
   private DataFactory() {
 

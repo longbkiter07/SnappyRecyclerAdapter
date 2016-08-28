@@ -1,5 +1,7 @@
 package com.silong.fastrecycler;
 
+import com.silong.fastrecycler.logs.Ln;
+
 import android.support.v7.util.DiffUtil;
 
 import java.util.List;
@@ -20,7 +22,10 @@ public class Utils {
       List<D> newData) {
     return Observable.create(subscriber -> {
       try {
+        long time = System.currentTimeMillis();
+        Ln.d("calculating");
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new FastDiffCallback<>(dataComparable, oldData, newData));
+        Ln.d("calculated:" + (System.currentTimeMillis() - time));
         onNext(subscriber, diffResult, true);
       } catch (Exception e) {
         onError(subscriber, e);

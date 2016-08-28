@@ -1,13 +1,10 @@
 package com.silong.fastrecycler;
 
-import com.silong.fastrecycler.rx.BehaviorBufferOperator;
-
 import android.support.v7.widget.RecyclerView;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -19,7 +16,7 @@ import rx.subjects.PublishSubject;
  */
 public abstract class FastRecyclerViewAdapter<D, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
-  private static final int BUFFER_TIME = 25; //ms
+  private static final int MAX_SIZE_TO_CALL_DIFF = 512; //ms
 
   private static final String TAG = FastRecyclerViewAdapter.class.getSimpleName();
 
@@ -37,45 +34,67 @@ public abstract class FastRecyclerViewAdapter<D, VH extends RecyclerView.ViewHol
     mProcessingSubject = PublishSubject.create();
     mFinishedSubject = PublishSubject.create();
     mProcessingSubject
-        .compose(BehaviorBufferOperator.applyBehaviorBuffer(BUFFER_TIME, TimeUnit.MILLISECONDS, Schedulers.computation()))
-        .concatMap(behaviors -> Observable.from(behaviors).concatMap(behavior -> processBehaviors(behavior)))
+        .observeOn(Schedulers.computation())
+        .concatMap(behavior -> processBehaviors(behavior))
         .subscribe();
   }
 
   private Observable<Void> processBehaviors(Behavior<D> behavior) {
     if (behavior.mAction == Action.SET) {
-      return Utils.calculate(mDataComparable, mRecyclerList.newCurrentList(), behavior.mItems)
-          .observeOn(AndroidSchedulers.mainThread())
-          .doOnNext(diffResult -> {
-            mRecyclerList.setItems(behavior.mItems);
-            diffResult.dispatchUpdatesTo(this);
-          })
-          .<Void>map(diffResult -> null)
-          .doOnNext(o -> mFinishedSubject.onNext(behavior));
+      if (mRecyclerList.size() <= MAX_SIZE_TO_CALL_DIFF && behavior.mItems.size() <= MAX_SIZE_TO_CALL_DIFF) {
+        return Utils.calculate(mDataComparable, mRecyclerList.newCurrentList(), behavior.mItems)
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext(diffResult -> {
+              mRecyclerList.setItems(behavior.mItems);
+              diffResult.dispatchUpdatesTo(this);
+            })
+            .<Void>map(diffResult -> null)
+            .doOnNext(o -> mFinishedSubject.onNext(behavior));
+      } else {
+        return Observable.<Void>create(subscriber -> {
+          mRecyclerList.setItems(behavior.mItems);
+          notifyDataSetChanged();
+          Utils.onNext(subscriber, null, true);
+        })
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .doOnNext(o -> mFinishedSubject.onNext(behavior));
+      }
     } else {
       return Observable.<Void>create(subscriber -> {
         switch (behavior.mAction) {
           case ADD:
+            int size = behavior.mItems.size();
+            int startPos;
             if (behavior.mPos >= 0) {
               mRecyclerList.addAll(behavior.mItems, behavior.mPos);
+              startPos = behavior.mPos;
             } else {
+              startPos = mRecyclerList.size();
               mRecyclerList.addAll(behavior.mItems);
             }
+            notifyItemRangeInserted(startPos, size);
             break;
           case UPDATE:
             mRecyclerList.update(behavior.mItems.get(0), behavior.mPos);
+            notifyItemChanged(behavior.mPos);
             break;
           case REMOVE:
+            int removeIndex;
             if (behavior.mPos >= 0) {
-              mRecyclerList.remove(behavior.mPos);
+              removeIndex = behavior.mPos;
             } else {
-              mRecyclerList.remove(behavior.mItems.get(0));
+              removeIndex = mRecyclerList.find(behavior.mItems.get(0));
             }
+            mRecyclerList.remove(removeIndex);
+            notifyItemRemoved(removeIndex);
             break;
           case CLEAR:
+            size = mRecyclerList.size();
             mRecyclerList.clear();
+            notifyItemRangeRemoved(0, size);
             break;
         }
+        Utils.onNext(subscriber, null, true);
       }).doOnNext(o -> mFinishedSubject.onNext(behavior))
           .subscribeOn(AndroidSchedulers.mainThread());
     }

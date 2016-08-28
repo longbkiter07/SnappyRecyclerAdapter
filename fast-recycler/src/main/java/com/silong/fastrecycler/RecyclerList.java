@@ -15,7 +15,7 @@ public interface RecyclerList<D> {
 
   void remove(int pos);
 
-  void remove(D item);
+  int find(D item);
 
   void addAll(List<D> items, int startPos);
 

@@ -35,8 +35,8 @@ public class ArrayListRecyclerList<D> implements RecyclerList<D> {
   }
 
   @Override
-  public void remove(D item) {
-    mItems.remove(item);
+  public int find(D item) {
+    return mItems.indexOf(item);
   }
 
   @Override
