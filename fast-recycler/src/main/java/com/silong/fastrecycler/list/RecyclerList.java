@@ -1,4 +1,4 @@
-package com.silong.fastrecycler;
+package com.silong.fastrecycler.list;
 
 import java.util.List;
 

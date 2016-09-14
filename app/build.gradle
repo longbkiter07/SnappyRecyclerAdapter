@@ -1,9 +1,13 @@
 apply plugin: 'com.android.application'
+apply plugin: "me.tatarka.retrolambda"
 
 android {
   compileSdkVersion 24
   buildToolsVersion "24.0.1"
-
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
   defaultConfig {
     applicationId "com.silong.fastrecyclerviewadapter"
     minSdkVersion 15

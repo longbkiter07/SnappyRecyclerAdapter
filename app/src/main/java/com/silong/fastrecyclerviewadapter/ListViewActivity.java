@@ -23,22 +23,34 @@ public class ListViewActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     ListView listView = new ListView(this);
     setContentView(listView);
-    mListViewAdapter = new ListViewAdapter(DataFactory.fakeUsersToSet(DataFactory.CHUNK));
-    listView.setAdapter(mListViewAdapter);
+    DataFactory.fakeUsersToSet(DataFactory.CHUNK)
+        .subscribe(users -> {
+          mListViewAdapter = new ListViewAdapter(users);
+          listView.setAdapter(mListViewAdapter);
+        });
   }
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_add_multi:
-        mListViewAdapter.add(DataFactory.fakeUsersToAddOrUpdate(mListViewAdapter.getCount(), DataFactory.CHUNK));
+        DataFactory.fakeUsersToAddOrUpdate(mListViewAdapter.getCount(), DataFactory.CHUNK)
+            .subscribe(users -> {
+              mListViewAdapter.add(users);
+            });
         break;
       case R.id.action_add_multi_at_specific_index:
-        mListViewAdapter
-            .add(DataFactory.fakeUsersToAddOrUpdate(mListViewAdapter.getCount(), DataFactory.CHUNK), mListViewAdapter.getCount() / 2);
+        DataFactory.fakeUsersToAddOrUpdate(mListViewAdapter.getCount(), DataFactory.CHUNK)
+            .subscribe(users -> {
+              mListViewAdapter
+                  .add(users, mListViewAdapter.getCount() / 2);
+            });
         break;
       case R.id.action_add_single:
-        mListViewAdapter.add(DataFactory.fakeUsersToAddOrUpdate(mListViewAdapter.getCount(), 1));
+        DataFactory.fakeUsersToAddOrUpdate(mListViewAdapter.getCount(), 1)
+            .subscribe(users -> {
+              mListViewAdapter.add(users);
+            });
         break;
       case R.id.action_clear:
         mListViewAdapter.clear();
@@ -47,7 +59,10 @@ public class ListViewActivity extends AppCompatActivity {
         mListViewAdapter.remove((int) (Math.random() * mListViewAdapter.getCount() - 1));
         break;
       case R.id.action_set_items:
-        mListViewAdapter.setUsers(DataFactory.fakeUsersToSet(DataFactory.CHUNK));
+        DataFactory.fakeUsersToSet(DataFactory.CHUNK)
+            .subscribe(users -> {
+              mListViewAdapter.setUsers(users);
+            });
         break;
       case R.id.action_set_one_item:
         mListViewAdapter.setUserAt(new User("custom_name" + Math.random(), 100, User.Gender.male),

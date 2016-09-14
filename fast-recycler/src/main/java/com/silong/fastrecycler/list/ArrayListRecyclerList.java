@@ -1,4 +1,4 @@
-package com.silong.fastrecycler;
+package com.silong.fastrecycler.list;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,11 @@ import java.util.List;
  */
 public class ArrayListRecyclerList<D> implements RecyclerList<D> {
 
-  private List<D> mItems;
+  private final ArrayList<D> mItems;
+
+  public ArrayListRecyclerList() {
+    mItems = new ArrayList<>();
+  }
 
   public ArrayListRecyclerList(int startSize) {
     mItems = new ArrayList<>(startSize);

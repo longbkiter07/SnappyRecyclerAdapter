@@ -10,11 +10,11 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-public class RegularRecyclerViewArapter extends RecyclerView.Adapter<ItemViewHolder> {
+public class RegularRecyclerViewAdapter extends RecyclerView.Adapter<ItemViewHolder> {
 
   private final List<User> mUsers;
 
-  public RegularRecyclerViewArapter(List<User> users) {
+  public RegularRecyclerViewAdapter(List<User> users) {
     mUsers = users;
   }
 

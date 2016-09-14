@@ -2,8 +2,10 @@ package com.silong.fastrecyclerviewadapter;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Printer;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;

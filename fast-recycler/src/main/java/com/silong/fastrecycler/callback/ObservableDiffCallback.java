@@ -1,10 +1,14 @@
-package com.silong.fastrecycler;
+package com.silong.fastrecycler.callback;
+
+import com.silong.fastrecycler.DataComparable;
 
 import android.support.v7.util.DiffUtil;
 
 import java.util.List;
 
-public class FastDiffCallback<D> extends DiffUtil.Callback {
+import rx.Observable;
+
+public class ObservableDiffCallback<D> extends DiffUtil.Callback {
 
   private final DataComparable<D> mDataComparable;
 
@@ -12,10 +16,18 @@ public class FastDiffCallback<D> extends DiffUtil.Callback {
 
   private final List<D> mOldData;
 
-  FastDiffCallback(DataComparable<D> dataComparable, List<D> oldData, List<D> newData) {
+  ObservableDiffCallback(DataComparable<D> dataComparable, List<D> oldData, List<D> newData) {
     mOldData = oldData;
     mNewData = newData;
     mDataComparable = dataComparable;
+  }
+
+  public static <D> Observable<DiffUtil.DiffResult> calculate(DataComparable<D> dataComparable, List<D> oldData,
+      List<D> newData) {
+    return Observable.defer(() -> {
+      DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ObservableDiffCallback<>(dataComparable, oldData, newData));
+      return Observable.just(diffResult);
+    });
   }
 
   @Override
