@@ -25,7 +25,7 @@ compile 'com.android.support:recyclerview-v7:24.+'
 
 ```
 
-Code example: read [here] (https://github.com/longbkiter07/ObservableRecyclerAdapter/blob/master/app/src/main/java/me/silong/observablerm/adapter/UserRecyclerViewAdapter.java)
+Code example: read [here] (https://github.com/longbkiter07/SnappyRecyclerAdapter/blob/master/app/src/main/java/com/silong/snappyrecycleradapter/adapter/UserRecyclerViewAdapter.java)
 
 ## Create your RecyclerList:
 
@@ -71,7 +71,7 @@ The library also supports `remove`, `set`, `clear` method.
 
 # Issue
 
-Welcome everyone to discuss about this library [here] (https://github.com/longbkiter07/ObservableRecyclerAdapter/issues).
+Welcome everyone to discuss about this library [here] (https://github.com/longbkiter07/SnappyRecyclerAdapter/issues).
 
 # Thanks
 
