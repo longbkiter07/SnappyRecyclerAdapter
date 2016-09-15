@@ -1,4 +1,4 @@
-# SnappyRecyclerViewAdapter
+# SnappyRecyclerAdapter
 
 This library helps you to manage `RecyclerViewAdapter` easier. 
 
