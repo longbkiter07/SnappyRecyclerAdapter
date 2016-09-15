@@ -40,15 +40,17 @@ RecyclerList<T> recyclerList = ListUtils.createLinkedList();
 ## Create your RecyclerViewAdapter:
 
 ```
-private final ObservableAdapterManager<User> mObservableAdapterManager;
-  public MyRecyclerViewAdapter(RecyclerList<User> recyclerList) {
-    mObservableAdapterManager = new ObservableAdapterManager<User>(this, recyclerList, null);
-  }
-  @Override
-  public int getItemCount() {
-    return mObservableAdapterManager.getItemCount();
-  }
-  ...
+public class MyAdapter<VH> extends RecyclerViewAdapter<VH> {
+    private final ObservableAdapterManager<User> mObservableAdapterManager;
+    public MyRecyclerViewAdapter(RecyclerList<User> recyclerList) {
+      mObservableAdapterManager = new ObservableAdapterManager<User>(this, recyclerList, null);
+    }
+    @Override
+    public int getItemCount() {
+      return mObservableAdapterManager.getItemCount();
+    }
+    ...
+}
 ```
 
 If you want to use `DiffUtil`, you would implement `DataComparable` to define differences between 2 items. Otherwise, you can pass `null` value.
