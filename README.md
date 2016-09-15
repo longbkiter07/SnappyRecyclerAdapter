@@ -4,16 +4,16 @@ This library helps you to manage `RecyclerViewAdapter` easier.
 
 # Features
 
-* Calling `notifyDataSetChanges`, `notifyItemInserted`, `notifyItemChanged`... and apply [DiffUtil] (https://developer.android.com/reference/android/support/v7/util/DiffUtil.html) automatically.
+* Calling `notifyDataSetChanges`, `notifyItemInserted`, `notifyItemChanged`... and apply [DiffUtil] (https://developer.android.com/reference/android/support/v7/util/DiffUtil.html) automatically so you don't care about them anymore.
 * Calling `DiffUtil` in background thread so that the ui does not lag.
-* Queueing events to keep data is consistent
+* Queueing events to keep data is consistent.
 * Observable method so that we can catch the callback to do next action.
-* Supporting LinkedList, ArrayList up to you.
+* Supporting LinkedList, ArrayList for reasonable usage.
 
 # Usage
 
-This library requires RxJava / RxAndroid library to use.
- 
+This library requires RxJava / RxAndroid and AppCompat version 24.2.+(or newer) library to use.
+
 ```
 compile 'io.reactivex:rxandroid:{lastest_version}'
 compile 'io.reactivex:rxjava:{lastest_version}'
@@ -22,7 +22,10 @@ compile ('me.silong:observablerm:{latest_version}'){
 }
 compile 'com.android.support:appcompat-v7:24.+'
 compile 'com.android.support:recyclerview-v7:24.+'
-``` 
+
+```
+
+Code example: read [here] (https://github.com/longbkiter07/ObservableRecyclerAdapter/blob/master/app/src/main/java/me/silong/observablerm/adapter/UserRecyclerViewAdapter.java)
 
 # Issue
 
