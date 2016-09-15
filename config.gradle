@@ -1,0 +1,51 @@
+/*
+ * Copyright (C) 2016 MySQUAR. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of MySQUAR or one of its
+ * subsidiaries. You shall not disclose this confidential information and shall use it only in
+ * accordance with the terms of the license agreement or other applicable agreement you entered into
+ * with MySQUAR.
+ *
+ * MySQUAR MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE SOFTWARE, EITHER
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. MySQUAR SHALL NOT BE LIABLE FOR ANY LOSSES
+ * OR DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING THIS SOFTWARE OR
+ * ITS DERIVATIVES.
+ */
+
+ext {
+
+  android = [
+      compileSdkVersion: 24,
+      buildToolsVersion: "24.0.1",
+      applicationId    : "me.silong.observablerm",
+      minSdkVersion    : 15,
+      targetSdkVersion : 23,
+      versionCode      : 24,
+      versionName      : "0.1.0"
+  ]
+
+  bintray = [
+      bintrayRepo       : "maven",
+      bintrayName       : "observablerm",
+
+      publishedGroupId  : "me.silong",
+      libraryName       : "Observable RecyclerViewAdapter Manager",
+      artifact          : "observablerm",
+
+      libraryDescription: "Observable RecyclerViewAdapter Manager",
+
+      siteUrl           : "https://github.com/longbkiter07/ObservableRecyclerAdapter/",
+      gitUrl            : "git@github.com:longbkiter07/ObservableRecyclerAdapter.git",
+
+      libraryVersion    : rootProject.ext.android["versionName"],
+
+      developerId       : "longbkiter07",
+      developerName     : "Si Long",
+      developerEmail    : "long.bkiter07@gmail.com",
+
+      licenseName       : "The Apache Software License, Version 2.0",
+      licenseUrl        : "http://www.apache.org/licenses/LICENSE-2.0.txt",
+      allLicenses       : ["Apache-2.0"]
+  ]
+}
