@@ -9,7 +9,7 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
   defaultConfig {
-    applicationId "com.silong.fastrecyclerviewadapter"
+    applicationId "com.silong.snappyrecyclerviewadapter"
     minSdkVersion 15
     targetSdkVersion 24
     versionCode 1

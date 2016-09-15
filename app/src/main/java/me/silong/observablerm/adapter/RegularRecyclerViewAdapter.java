@@ -1,14 +1,13 @@
 package me.silong.observablerm.adapter;
 
-import me.silong.observablerm.ItemViewHolder;
-import me.silong.observablerm.R;
-import me.silong.observablerm.model.User;
-
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import java.util.List;
+
+import me.silong.observablerm.ItemViewHolder;
+import me.silong.observablerm.model.User;
 
 public class RegularRecyclerViewAdapter extends RecyclerView.Adapter<ItemViewHolder> {
 

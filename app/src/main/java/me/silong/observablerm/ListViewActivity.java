@@ -1,5 +1,6 @@
 package me.silong.observablerm;
 
+
 import me.silong.observablerm.adapter.ListViewAdapter;
 import me.silong.observablerm.model.DataFactory;
 import me.silong.observablerm.model.User;

@@ -8,14 +8,19 @@ import java.util.ListIterator;
 /**
  * Created by SILONG on 8/27/16.
  */
-public class LinkedListRecyclerList<D> implements RecyclerList<D> {
+class LinkedListRecyclerList<D> implements RecyclerList<D> {
 
   private LinkedList<D> mItems;
 
   private ListIterator<D> mListIterator;
 
-  public LinkedListRecyclerList() {
+  LinkedListRecyclerList() {
     mItems = new LinkedList<>();
+    mListIterator = mItems.listIterator();
+  }
+
+  LinkedListRecyclerList(List<D> defaultData) {
+    mItems = defaultData == null ? new LinkedList<>() : new LinkedList<>(defaultData);
     mListIterator = mItems.listIterator();
   }
 

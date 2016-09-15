@@ -6,16 +6,20 @@ import java.util.List;
 /**
  * Created by SILONG on 8/27/16.
  */
-public class ArrayListRecyclerList<D> implements RecyclerList<D> {
+class ArrayListRecyclerList<D> implements RecyclerList<D> {
 
   private final ArrayList<D> mItems;
 
-  public ArrayListRecyclerList() {
+  ArrayListRecyclerList() {
     mItems = new ArrayList<>();
   }
 
-  public ArrayListRecyclerList(int startSize) {
+  ArrayListRecyclerList(int startSize) {
     mItems = new ArrayList<>(startSize);
+  }
+
+  ArrayListRecyclerList(List<D> defaultData) {
+    mItems = defaultData == null ? new ArrayList<>() : new ArrayList<>(defaultData);
   }
 
   @Override

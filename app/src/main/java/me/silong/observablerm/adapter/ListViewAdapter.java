@@ -1,7 +1,5 @@
 package me.silong.observablerm.adapter;
 
-import me.silong.observablerm.ItemViewHolder;
-import me.silong.observablerm.model.User;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +7,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.List;
+
+import me.silong.observablerm.ItemViewHolder;
+import me.silong.observablerm.model.User;
 
 public class ListViewAdapter extends BaseAdapter {
 
@@ -79,7 +80,7 @@ public class ListViewAdapter extends BaseAdapter {
   public View getView(int i, View view, ViewGroup viewGroup) {
     ItemViewHolder itemViewHolder;
     if (view == null) {
-      view = LayoutInflater.from(viewGroup.getContext()).inflate(me.silong.observablerm.R.layout.item, viewGroup, false);
+      view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item, viewGroup, false);
       itemViewHolder = new ItemViewHolder(view);
       view.setTag(itemViewHolder);
     } else {

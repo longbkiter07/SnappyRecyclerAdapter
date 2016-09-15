@@ -1,18 +1,17 @@
 package me.silong.observablerm.adapter;
 
-import me.silong.observablerm.DataComparable;
-import me.silong.observablerm.ObservableAdapterManager;
-import me.silong.observablerm.list.ArrayListRecyclerList;
-import me.silong.observablerm.list.LinkedListRecyclerList;
-import me.silong.observablerm.list.RecyclerList;
-import me.silong.observablerm.ItemViewHolder;
-import me.silong.observablerm.R;
-import me.silong.observablerm.model.User;
 
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import me.silong.observablerm.DataComparable;
+import me.silong.observablerm.ItemViewHolder;
+import me.silong.observablerm.ObservableAdapterManager;
+import me.silong.observablerm.list.ListUtils;
+import me.silong.observablerm.list.RecyclerList;
+import me.silong.observablerm.model.User;
 
 /**
  * Created by SILONG on 8/28/16.
@@ -37,11 +36,11 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<ItemViewHolder
   }
 
   public static UserRecyclerViewAdapter newLinkedListAdapter() {
-    return new UserRecyclerViewAdapter(new LinkedListRecyclerList<User>());
+    return new UserRecyclerViewAdapter(ListUtils.createLinkedList());
   }
 
   public static UserRecyclerViewAdapter newArrayListAdapter(int size) {
-    return new UserRecyclerViewAdapter(new ArrayListRecyclerList<User>(size));
+    return new UserRecyclerViewAdapter(ListUtils.createArrayList(size));
   }
 
   public ObservableAdapterManager<User> getObservableAdapterManager() {

@@ -1,10 +1,5 @@
 package me.silong.observablerm;
 
-import me.silong.observablerm.adapter.RegularRecyclerViewAdapter;
-import me.silong.observablerm.adapter.UserRecyclerViewAdapter;
-import me.silong.observablerm.model.DataFactory;
-import me.silong.observablerm.model.User;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +9,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import me.silong.observablerm.adapter.RegularRecyclerViewAdapter;
+import me.silong.observablerm.adapter.UserRecyclerViewAdapter;
+import me.silong.observablerm.model.DataFactory;
+import me.silong.observablerm.model.User;
 
 /**
  * Created by SILONG on 8/28/16.

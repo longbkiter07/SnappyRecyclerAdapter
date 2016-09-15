@@ -1,4 +1,4 @@
-# Observable-RecyclerView-Adapter-Manager
+# SnappyRecyclerViewAdapter
 
 This library helps you to manage `RecyclerViewAdapter` easier. 
 
@@ -26,6 +26,46 @@ compile 'com.android.support:recyclerview-v7:24.+'
 ```
 
 Code example: read [here] (https://github.com/longbkiter07/ObservableRecyclerAdapter/blob/master/app/src/main/java/me/silong/observablerm/adapter/UserRecyclerViewAdapter.java)
+
+## Create your RecyclerList:
+
+```
+RecyclerList<T> recyclerList = ListUtils.createArrayList();
+```
+Or
+```
+RecyclerList<T> recyclerList = ListUtils.createLinkedList();
+```
+
+## Create your RecyclerViewAdapter:
+
+```
+private final ObservableAdapterManager<User> mObservableAdapterManager;
+  public MyRecyclerViewAdapter(RecyclerList<User> recyclerList) {
+    mObservableAdapterManager = new ObservableAdapterManager<User>(this, recyclerList, null);
+  }
+  @Override
+  public int getItemCount() {
+    return mObservableAdapterManager.getItemCount();
+  }
+  ...
+```
+
+If you want to use `DiffUtil`, you would implement `DataComparable` to define differences between 2 items. Otherwise, you can pass `null` value.
+
+## Add item:
+
+```
+mObservableAdapterManager.add(item).subscribe();
+```
+
+## Add item with callback:
+
+```
+mObservableAdapterManager.add(item).subscribe(o -> { ... }, throwable -> { ... }); 
+```
+
+The library also supports `remove`, `set`, `clear` method.
 
 # Issue
 

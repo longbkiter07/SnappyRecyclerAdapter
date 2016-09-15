@@ -1,12 +1,12 @@
 package me.silong.observablerm;
 
-import me.silong.observablerm.model.User;
-
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
 import java.util.Locale;
+
+import me.silong.observablerm.model.User;
 
 /**
  * Created by SILONG on 8/28/16.

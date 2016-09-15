@@ -1,16 +1,14 @@
 package me.silong.observablerm;
 
-import me.silong.observablerm.callback.ObservableDiffCallback;
-import me.silong.observablerm.list.ArrayListRecyclerList;
-import me.silong.observablerm.list.LinkedListRecyclerList;
-import me.silong.observablerm.list.RecyclerList;
-
 import android.support.v7.widget.RecyclerView;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import me.silong.observablerm.callback.ObservableDiffCallback;
+import me.silong.observablerm.list.ListUtils;
+import me.silong.observablerm.list.RecyclerList;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -46,7 +44,7 @@ public class ObservableAdapterManager<D> {
   }
 
   public ObservableAdapterManager(RecyclerView.Adapter adapter, ListType listType, DataComparable<D> dataComparable) {
-    this(adapter, listType == ListType.array_list ? new ArrayListRecyclerList<D>() : new LinkedListRecyclerList<D>(), dataComparable);
+    this(adapter, ListUtils.createList(null, listType), dataComparable);
   }
 
   private Observable<Void> processSetWithDiffCallback(Behavior<D> behavior) {
