@@ -1,9 +1,9 @@
 package me.silong.observablerm;
 
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,9 +28,9 @@ public class ObservableAdapterManager<D> {
 
   private final PublishSubject<Behavior<D>> mFinishedSubject;
 
-  private final RecyclerView.Adapter mAdapter;
+  @Nullable private RecyclerView.Adapter mAdapter;
 
-  public ObservableAdapterManager(RecyclerView.Adapter adapter, List<D> items, DataComparable<D> dataComparable) {
+  public ObservableAdapterManager(@Nullable RecyclerView.Adapter adapter, List<D> items, DataComparable<D> dataComparable) {
     mItems = items;
     mDataComparable = dataComparable;
     mProcessingSubject = PublishSubject.create();
@@ -38,8 +38,16 @@ public class ObservableAdapterManager<D> {
     mAdapter = adapter;
     mProcessingSubject
         .observeOn(Schedulers.computation())
-        .concatMap(behavior -> processBehaviors(behavior))
+        .concatMap(this::processBehaviors)
         .subscribe();
+  }
+
+  public ObservableAdapterManager(List<D> items, DataComparable<D> dataComparable) {
+    this(null, items, dataComparable);
+  }
+
+  public void attachTo(RecyclerView.Adapter adapter) {
+    mAdapter = adapter;
   }
 
   private Observable<Void> processSetWithDiffCallback(Behavior<D> behavior) {
@@ -48,7 +56,9 @@ public class ObservableAdapterManager<D> {
         .doOnNext(diffResult -> {
           mItems.clear();
           mItems.addAll(behavior.mItems);
-          diffResult.dispatchUpdatesTo(mAdapter);
+          if (mAdapter != null) {
+            diffResult.dispatchUpdatesTo(mAdapter);
+          }
         })
         .<Void>map(diffResult -> null)
         .doOnNext(o -> mFinishedSubject.onNext(behavior));
@@ -58,7 +68,9 @@ public class ObservableAdapterManager<D> {
     return Observable.defer(() -> {
       mItems.clear();
       mItems.addAll(behavior.mItems);
-      mAdapter.notifyDataSetChanged();
+      if (mAdapter != null) {
+        mAdapter.notifyDataSetChanged();
+      }
       return Observable.<Void>just(null);
     })
         .subscribeOn(AndroidSchedulers.mainThread())
@@ -78,11 +90,15 @@ public class ObservableAdapterManager<D> {
             startPos = mItems.size();
             mItems.addAll(behavior.mItems);
           }
-          mAdapter.notifyItemRangeInserted(startPos, size);
+          if (mAdapter != null) {
+            mAdapter.notifyItemRangeInserted(startPos, size);
+          }
           break;
         case UPDATE:
           mItems.set(behavior.mPos, behavior.mItems.get(0));
-          mAdapter.notifyItemChanged(behavior.mPos);
+          if (mAdapter != null) {
+            mAdapter.notifyItemChanged(behavior.mPos);
+          }
           break;
         case REMOVE:
           int removeIndex;
@@ -92,12 +108,16 @@ public class ObservableAdapterManager<D> {
             removeIndex = mItems.indexOf(behavior.mItems.get(0));
           }
           mItems.remove(removeIndex);
-          mAdapter.notifyItemRemoved(removeIndex);
+          if (mAdapter != null) {
+            mAdapter.notifyItemRemoved(removeIndex);
+          }
           break;
         case CLEAR:
           size = mItems.size();
           mItems.clear();
-          mAdapter.notifyItemRangeRemoved(0, size);
+          if (mAdapter != null) {
+            mAdapter.notifyItemRangeRemoved(0, size);
+          }
           break;
       }
       return Observable.<Void>just(null);
@@ -120,7 +140,7 @@ public class ObservableAdapterManager<D> {
 
   private Observable<Void> submitBehavior(Behavior<D> behavior) {
     return Observable.just(behavior)
-        .doOnNext(dBehavior -> mProcessingSubject.onNext(dBehavior))
+        .doOnNext(mProcessingSubject::onNext)
         .flatMap(dBehavior -> mFinishedSubject.filter(finishedBehavior -> dBehavior == finishedBehavior).take(1))
         .map(dBehavior -> null);
   }
@@ -158,7 +178,9 @@ public class ObservableAdapterManager<D> {
       return Observable.defer(() -> {
         mItems.clear();
         mItems.addAll(items);
-        mAdapter.notifyDataSetChanged();
+        if (mAdapter != null) {
+          mAdapter.notifyDataSetChanged();
+        }
         return Observable.<Void>just(null);
       }).subscribeOn(AndroidSchedulers.mainThread());
     } else {
@@ -195,7 +217,7 @@ public class ObservableAdapterManager<D> {
     Action mAction;
 
     public Behavior(D item, int pos, Action action) {
-      mItems = Arrays.asList(item);
+      mItems = Collections.singletonList(item);
       mPos = pos;
       mAction = action;
     }
