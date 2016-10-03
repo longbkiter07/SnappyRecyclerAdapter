@@ -2,13 +2,12 @@ package me.silong.observablerm;
 
 import android.support.v7.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import me.silong.observablerm.callback.ObservableDiffCallback;
-import me.silong.observablerm.list.ListUtils;
-import me.silong.observablerm.list.RecyclerList;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -21,7 +20,7 @@ public class ObservableAdapterManager<D> {
 
   private static final int MAX_SIZE_TO_CALL_DIFF = 512; //ms
 
-  private final RecyclerList<D> mRecyclerList;
+  private final List<D> mItems;
 
   private final DataComparable<D> mDataComparable;
 
@@ -31,8 +30,8 @@ public class ObservableAdapterManager<D> {
 
   private final RecyclerView.Adapter mAdapter;
 
-  public ObservableAdapterManager(RecyclerView.Adapter adapter, RecyclerList<D> recyclerList, DataComparable<D> dataComparable) {
-    mRecyclerList = recyclerList;
+  public ObservableAdapterManager(RecyclerView.Adapter adapter, List<D> items, DataComparable<D> dataComparable) {
+    mItems = items;
     mDataComparable = dataComparable;
     mProcessingSubject = PublishSubject.create();
     mFinishedSubject = PublishSubject.create();
@@ -43,15 +42,12 @@ public class ObservableAdapterManager<D> {
         .subscribe();
   }
 
-  public ObservableAdapterManager(RecyclerView.Adapter adapter, ListType listType, DataComparable<D> dataComparable) {
-    this(adapter, ListUtils.createList(null, listType), dataComparable);
-  }
-
   private Observable<Void> processSetWithDiffCallback(Behavior<D> behavior) {
-    return ObservableDiffCallback.calculate(mDataComparable, mRecyclerList.newCurrentList(), behavior.mItems)
+    return ObservableDiffCallback.calculate(mDataComparable, new ArrayList<D>(mItems), behavior.mItems)
         .observeOn(AndroidSchedulers.mainThread())
         .doOnNext(diffResult -> {
-          mRecyclerList.setItems(behavior.mItems);
+          mItems.clear();
+          mItems.addAll(behavior.mItems);
           diffResult.dispatchUpdatesTo(mAdapter);
         })
         .<Void>map(diffResult -> null)
@@ -60,7 +56,8 @@ public class ObservableAdapterManager<D> {
 
   private Observable<Void> processSetWithNotify(Behavior<D> behavior) {
     return Observable.defer(() -> {
-      mRecyclerList.setItems(behavior.mItems);
+      mItems.clear();
+      mItems.addAll(behavior.mItems);
       mAdapter.notifyDataSetChanged();
       return Observable.<Void>just(null);
     })
@@ -75,16 +72,16 @@ public class ObservableAdapterManager<D> {
           int size = behavior.mItems.size();
           int startPos;
           if (behavior.mPos >= 0) {
-            mRecyclerList.addAll(behavior.mItems, behavior.mPos);
+            mItems.addAll(behavior.mPos, behavior.mItems);
             startPos = behavior.mPos;
           } else {
-            startPos = mRecyclerList.size();
-            mRecyclerList.addAll(behavior.mItems);
+            startPos = mItems.size();
+            mItems.addAll(behavior.mItems);
           }
           mAdapter.notifyItemRangeInserted(startPos, size);
           break;
         case UPDATE:
-          mRecyclerList.update(behavior.mItems.get(0), behavior.mPos);
+          mItems.set(behavior.mPos, behavior.mItems.get(0));
           mAdapter.notifyItemChanged(behavior.mPos);
           break;
         case REMOVE:
@@ -92,14 +89,14 @@ public class ObservableAdapterManager<D> {
           if (behavior.mPos >= 0) {
             removeIndex = behavior.mPos;
           } else {
-            removeIndex = mRecyclerList.find(behavior.mItems.get(0));
+            removeIndex = mItems.indexOf(behavior.mItems.get(0));
           }
-          mRecyclerList.remove(removeIndex);
+          mItems.remove(removeIndex);
           mAdapter.notifyItemRemoved(removeIndex);
           break;
         case CLEAR:
-          size = mRecyclerList.size();
-          mRecyclerList.clear();
+          size = mItems.size();
+          mItems.clear();
           mAdapter.notifyItemRangeRemoved(0, size);
           break;
       }
@@ -110,7 +107,7 @@ public class ObservableAdapterManager<D> {
 
   private Observable<Void> processBehaviors(Behavior<D> behavior) {
     if (behavior.mAction == Action.SET) {
-      if (mDataComparable != null && mRecyclerList.size() <= MAX_SIZE_TO_CALL_DIFF
+      if (mDataComparable != null && mItems.size() <= MAX_SIZE_TO_CALL_DIFF
           && behavior.mItems.size() <= MAX_SIZE_TO_CALL_DIFF) {
         return processSetWithDiffCallback(behavior);
       } else {
@@ -157,9 +154,10 @@ public class ObservableAdapterManager<D> {
   }
 
   public Observable<Void> setItems(List<D> items) {
-    if (mRecyclerList.size() == 0) {
+    if (mItems.size() == 0) {
       return Observable.defer(() -> {
-        mRecyclerList.setItems(items);
+        mItems.clear();
+        mItems.addAll(items);
         mAdapter.notifyDataSetChanged();
         return Observable.<Void>just(null);
       }).subscribeOn(AndroidSchedulers.mainThread());
@@ -173,11 +171,11 @@ public class ObservableAdapterManager<D> {
   }
 
   public D getItemAt(int pos) {
-    return mRecyclerList.getItemAt(pos);
+    return mItems.get(pos);
   }
 
   public int getItemCount() {
-    return mRecyclerList.size();
+    return mItems.size();
   }
 
   private enum Action {
@@ -186,11 +184,6 @@ public class ObservableAdapterManager<D> {
     CLEAR,
     SET,
     UPDATE
-  }
-
-  public enum ListType {
-    array_list,
-    linked_list
   }
 
   private static class Behavior<D> {

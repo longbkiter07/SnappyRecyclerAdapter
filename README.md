@@ -30,20 +30,20 @@ Code example: read [here] (https://github.com/longbkiter07/SnappyRecyclerAdapter
 ## Create your RecyclerList:
 
 ```
-RecyclerList<T> recyclerList = ListUtils.createArrayList();
+List<T> recyclerList = new ArrayList<>();
 ```
 Or
 ```
-RecyclerList<T> recyclerList = ListUtils.createLinkedList();
+List<T> recyclerList = new RecyclerLinkedList<>();
 ```
-
+`RecyclerLinkedList` is a list that helps you to improve performance for `get(int index)` method.
 ## Create your RecyclerViewAdapter:
 
 ```
 public class MyAdapter<VH> extends RecyclerViewAdapter<VH> {
     private final ObservableAdapterManager<User> mObservableAdapterManager;
-    public MyRecyclerViewAdapter(RecyclerList<User> recyclerList) {
-      mObservableAdapterManager = new ObservableAdapterManager<User>(this, recyclerList, null);
+    public MyRecyclerViewAdapter(List<User> items) {
+      mObservableAdapterManager = new ObservableAdapterManager<User>(this, items, null);
     }
     @Override
     public int getItemCount() {

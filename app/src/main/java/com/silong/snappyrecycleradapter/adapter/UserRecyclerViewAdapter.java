@@ -10,10 +10,12 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.silong.observablerm.DataComparable;
 import me.silong.observablerm.ObservableAdapterManager;
-import me.silong.observablerm.list.ListUtils;
-import me.silong.observablerm.list.RecyclerList;
+import me.silong.observablerm.list.RecyclerLinkedList;
 
 /**
  * Created by SILONG on 8/28/16.
@@ -22,7 +24,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<ItemViewHolder
 
   private final ObservableAdapterManager<User> mObservableAdapterManager;
 
-  public UserRecyclerViewAdapter(RecyclerList<User> recyclerList) {
+  public UserRecyclerViewAdapter(List<User> recyclerList) {
     mObservableAdapterManager = new ObservableAdapterManager<User>(this, recyclerList,
         new DataComparable<User>() {
           @Override
@@ -38,11 +40,11 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<ItemViewHolder
   }
 
   public static UserRecyclerViewAdapter newLinkedListAdapter() {
-    return new UserRecyclerViewAdapter(ListUtils.createLinkedList());
+    return new UserRecyclerViewAdapter(new RecyclerLinkedList<>());
   }
 
   public static UserRecyclerViewAdapter newArrayListAdapter(int size) {
-    return new UserRecyclerViewAdapter(ListUtils.createArrayList(size));
+    return new UserRecyclerViewAdapter(new ArrayList<>());
   }
 
   public ObservableAdapterManager<User> getObservableAdapterManager() {
