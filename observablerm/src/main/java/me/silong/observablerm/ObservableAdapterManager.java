@@ -37,6 +37,7 @@ public class ObservableAdapterManager<D> {
     mFinishedSubject = PublishSubject.create();
     mAdapter = adapter;
     mProcessingSubject
+        .onBackpressureBuffer()
         .observeOn(Schedulers.computation())
         .concatMap(this::processBehaviors)
         .subscribe();
