@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -113,6 +114,13 @@ public class ObservableAdapterManager<D> {
             mAdapter.notifyItemRemoved(removeIndex);
           }
           break;
+        case MOVE:
+          mItems.remove(behavior.mPos);
+          mItems.add(behavior.mDestPos, behavior.mItems.get(0));
+          if (mAdapter != null) {
+            mAdapter.notifyItemMoved(behavior.mPos, behavior.mDestPos);
+          }
+          break;
         case CLEAR:
           size = mItems.size();
           mItems.clear();
@@ -174,6 +182,10 @@ public class ObservableAdapterManager<D> {
     return submitBehavior(new Behavior<D>(Collections.emptyList(), Action.CLEAR));
   }
 
+  public Observable<Void> move(D item, int startPos, int destPost) {
+    return submitBehavior(new Behavior<D>(item, startPos, Action.MOVE, destPost));
+  }
+
   public Observable<Void> setItems(List<D> items) {
     if (mItems.size() == 0) {
       return Observable.defer(() -> {
@@ -189,9 +201,10 @@ public class ObservableAdapterManager<D> {
     }
   }
 
-  public Observable<Void> update(int position, D item) {
+  public Observable<Void> update(D item, int position) {
     return submitBehavior(new Behavior<D>(item, position, Action.UPDATE));
   }
+
 
   public D getItemAt(int pos) {
     return mItems.get(pos);
@@ -206,21 +219,22 @@ public class ObservableAdapterManager<D> {
     REMOVE,
     CLEAR,
     SET,
+    MOVE,
     UPDATE
   }
 
   private static class Behavior<D> {
 
-    List<D> mItems;
+    final List<D> mItems;
 
-    int mPos;
+    final int mPos;
 
-    Action mAction;
+    final Action mAction;
+
+    final int mDestPos;
 
     public Behavior(D item, int pos, Action action) {
-      mItems = Collections.singletonList(item);
-      mPos = pos;
-      mAction = action;
+      this(Arrays.asList(item), pos, action, pos);
     }
 
     public Behavior(List<D> items, Action action) {
@@ -228,9 +242,18 @@ public class ObservableAdapterManager<D> {
     }
 
     public Behavior(List<D> items, int pos, Action action) {
+      this(items, pos, action, pos);
+    }
+
+    public Behavior(D item, int pos, Action action, int destPos) {
+      this(Arrays.asList(item), pos, action, destPos);
+    }
+
+    public Behavior(List<D> items, int pos, Action action, int destPos) {
       mItems = items;
       mPos = pos;
       mAction = action;
+      mDestPos = destPos;
     }
 
     public Behavior(D item, Action action) {
