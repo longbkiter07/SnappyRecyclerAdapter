@@ -53,7 +53,7 @@ public class ObservableAdapterManager<D> {
   }
 
   private Observable<Void> processSetWithDiffCallback(Behavior<D> behavior) {
-    return ObservableDiffCallback.calculate(mDataComparable, new ArrayList<D>(mItems), behavior.mItems)
+    return ObservableDiffCallback.calculate(mDataComparable, new ArrayList<>(mItems), behavior.mItems)
         .observeOn(AndroidSchedulers.mainThread())
         .doOnNext(diffResult -> {
           mItems.clear();
@@ -186,7 +186,7 @@ public class ObservableAdapterManager<D> {
     return submitBehavior(new Behavior<D>(item, startPos, Action.MOVE, destPost));
   }
 
-  public Observable<Void> setItems(List<D> items) {
+  public Observable<Void> setItems(List<? extends D> items) {
     if (mItems.size() == 0) {
       return Observable.defer(() -> {
         mItems.clear();
@@ -225,7 +225,7 @@ public class ObservableAdapterManager<D> {
 
   private static class Behavior<D> {
 
-    final List<D> mItems;
+    final List<? extends D> mItems;
 
     final int mPos;
 
@@ -237,11 +237,11 @@ public class ObservableAdapterManager<D> {
       this(Arrays.asList(item), pos, action, pos);
     }
 
-    public Behavior(List<D> items, Action action) {
+    public Behavior(List<? extends D> items, Action action) {
       this(items, -1, action);
     }
 
-    public Behavior(List<D> items, int pos, Action action) {
+    public Behavior(List<? extends D> items, int pos, Action action) {
       this(items, pos, action, pos);
     }
 
@@ -249,7 +249,7 @@ public class ObservableAdapterManager<D> {
       this(Arrays.asList(item), pos, action, destPos);
     }
 
-    public Behavior(List<D> items, int pos, Action action, int destPos) {
+    public Behavior(List<? extends D> items, int pos, Action action, int destPos) {
       mItems = items;
       mPos = pos;
       mAction = action;
