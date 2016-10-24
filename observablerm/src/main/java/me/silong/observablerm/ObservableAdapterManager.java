@@ -10,6 +10,7 @@ import java.util.List;
 
 import me.silong.observablerm.callback.ObservableDiffCallback;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
@@ -31,21 +32,38 @@ public class ObservableAdapterManager<D> {
 
   @Nullable private RecyclerView.Adapter mAdapter;
 
+  private Subscription mProcessingSubscription;
+
   public ObservableAdapterManager(@Nullable RecyclerView.Adapter adapter, List<D> items, DataComparable<D> dataComparable) {
     mItems = items;
     mDataComparable = dataComparable;
     mProcessingSubject = PublishSubject.create();
     mFinishedSubject = PublishSubject.create();
     mAdapter = adapter;
-    mProcessingSubject
-        .onBackpressureBuffer()
-        .observeOn(Schedulers.computation())
-        .concatMap(this::processBehaviors)
-        .subscribe();
+    init();
   }
 
   public ObservableAdapterManager(List<D> items, DataComparable<D> dataComparable) {
     this(null, items, dataComparable);
+  }
+
+  private void unsubscribe() {
+    if (mProcessingSubscription != null && !mProcessingSubscription.isUnsubscribed()) {
+      mProcessingSubscription.unsubscribe();
+    }
+  }
+
+  public void clearEvents() {
+    init();
+  }
+
+  private void init() {
+    unsubscribe();
+    mProcessingSubscription = mProcessingSubject
+        .onBackpressureBuffer()
+        .observeOn(Schedulers.computation())
+        .concatMap(this::processBehaviors)
+        .subscribe();
   }
 
   public void attachTo(RecyclerView.Adapter adapter) {
