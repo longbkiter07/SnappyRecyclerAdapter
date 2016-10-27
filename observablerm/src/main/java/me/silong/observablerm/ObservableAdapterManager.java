@@ -115,8 +115,12 @@ public class ObservableAdapterManager<D> {
           }
           break;
         case UPDATE:
-          mItems.set(behavior.mPos, behavior.mItems.get(0));
-          if (mAdapter != null) {
+          D item = behavior.mItems.get(0);
+          D oldItem = mItems.get(behavior.mPos);
+          mItems.set(behavior.mPos, item);
+          if (mAdapter != null && mDataComparable != null
+              && mDataComparable.areItemsTheSame(oldItem, item)
+              && mDataComparable.areContentsTheSame(oldItem, item)) {
             mAdapter.notifyItemChanged(behavior.mPos);
           }
           break;
@@ -133,10 +137,15 @@ public class ObservableAdapterManager<D> {
           }
           break;
         case MOVE:
-          mItems.remove(behavior.mPos);
-          mItems.add(behavior.mDestPos, behavior.mItems.get(0));
+          oldItem = mItems.remove(behavior.mPos);
+          item = behavior.mItems.get(0);
+          mItems.add(behavior.mDestPos, item);
           if (mAdapter != null) {
             mAdapter.notifyItemMoved(behavior.mPos, behavior.mDestPos);
+            if (mDataComparable != null && mDataComparable.areItemsTheSame(oldItem, item) && mDataComparable
+                .areContentsTheSame(oldItem, item)) {
+              mAdapter.notifyItemChanged(behavior.mDestPos);
+            }
           }
           break;
         case CLEAR:
