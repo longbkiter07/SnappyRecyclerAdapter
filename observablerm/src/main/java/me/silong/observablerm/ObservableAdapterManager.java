@@ -118,9 +118,7 @@ public class ObservableAdapterManager<D> {
           D item = behavior.mItems.get(0);
           D oldItem = mItems.get(behavior.mPos);
           mItems.set(behavior.mPos, item);
-          if (mAdapter != null && mDataComparable != null
-              && mDataComparable.areItemsTheSame(oldItem, item)
-              && mDataComparable.areContentsTheSame(oldItem, item)) {
+          if (mAdapter != null && shouldCallUpdate(oldItem, item)) {
             mAdapter.notifyItemChanged(behavior.mPos);
           }
           break;
@@ -142,8 +140,7 @@ public class ObservableAdapterManager<D> {
           mItems.add(behavior.mDestPos, item);
           if (mAdapter != null) {
             mAdapter.notifyItemMoved(behavior.mPos, behavior.mDestPos);
-            if (mDataComparable != null && mDataComparable.areItemsTheSame(oldItem, item) && mDataComparable
-                .areContentsTheSame(oldItem, item)) {
+            if (mDataComparable != null && shouldCallUpdate(oldItem, item)) {
               mAdapter.notifyItemChanged(behavior.mDestPos);
             }
           }
@@ -159,6 +156,12 @@ public class ObservableAdapterManager<D> {
       return Observable.<Void>just(null);
     }).doOnNext(o -> mFinishedSubject.onNext(behavior))
         .subscribeOn(AndroidSchedulers.mainThread());
+  }
+
+  private boolean shouldCallUpdate(D oldItem, D newItem) {
+    return mDataComparable != null
+        && (!mDataComparable.areItemsTheSame(oldItem, newItem)
+        || !mDataComparable.areContentsTheSame(oldItem, newItem));
   }
 
   private Observable<Void> processBehaviors(Behavior<D> behavior) {
