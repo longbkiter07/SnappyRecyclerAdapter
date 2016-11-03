@@ -28,7 +28,7 @@ public class ObservableAdapterManager<D> {
 
   private final PublishSubject<Behavior<D>> mProcessingSubject;
 
-  private final PublishSubject<Behavior<D>> mFinishedSubject;
+  private final PublishSubject<Long> mFinishedSubject;
 
   @Nullable private RecyclerView.Adapter mAdapter;
 
@@ -62,7 +62,9 @@ public class ObservableAdapterManager<D> {
     mProcessingSubscription = mProcessingSubject
         .onBackpressureBuffer()
         .observeOn(Schedulers.computation())
-        .concatMap(this::processBehaviors)
+        .concatMap(dBehavior -> processBehaviors(dBehavior).doOnNext(aVoid1 -> {
+          mFinishedSubject.onNext(dBehavior.createdAt);
+        }))
         .subscribe();
   }
 
@@ -80,8 +82,7 @@ public class ObservableAdapterManager<D> {
             diffResult.dispatchUpdatesTo(mAdapter);
           }
         })
-        .<Void>map(diffResult -> null)
-        .doOnNext(o -> mFinishedSubject.onNext(behavior));
+        .<Void>map(diffResult -> null);
   }
 
   private Observable<Void> processSetWithNotify(Behavior<D> behavior) {
@@ -93,8 +94,7 @@ public class ObservableAdapterManager<D> {
       }
       return Observable.<Void>just(null);
     })
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .doOnNext(o -> mFinishedSubject.onNext(behavior));
+        .subscribeOn(AndroidSchedulers.mainThread());
   }
 
   private Observable<Void> processSingleOperator(Behavior<D> behavior) {
@@ -154,8 +154,7 @@ public class ObservableAdapterManager<D> {
           break;
       }
       return Observable.<Void>just(null);
-    }).doOnNext(o -> mFinishedSubject.onNext(behavior))
-        .subscribeOn(AndroidSchedulers.mainThread());
+    }).subscribeOn(AndroidSchedulers.mainThread());
   }
 
   private boolean shouldCallUpdate(D oldItem, D newItem) {
@@ -178,10 +177,10 @@ public class ObservableAdapterManager<D> {
   }
 
   private Observable<Void> submitBehavior(Behavior<D> behavior) {
-    return Observable.just(behavior)
-        .doOnNext(mProcessingSubject::onNext)
-        .flatMap(dBehavior -> mFinishedSubject.filter(finishedBehavior -> dBehavior == finishedBehavior).take(1))
-        .map(dBehavior -> null);
+    return Observable.defer(() -> mFinishedSubject
+        .doOnSubscribe(() -> mProcessingSubject.onNext(behavior))
+        .filter(aLong -> aLong >= behavior.createdAt).take(1)
+        .<Void>map(dBehavior -> null));
   }
 
   public Observable<Void> add(D item) {
@@ -217,18 +216,7 @@ public class ObservableAdapterManager<D> {
   }
 
   public Observable<Void> setItems(List<? extends D> items) {
-    if (mItems.size() == 0) {
-      return Observable.defer(() -> {
-        mItems.clear();
-        mItems.addAll(items);
-        if (mAdapter != null) {
-          mAdapter.notifyDataSetChanged();
-        }
-        return Observable.<Void>just(null);
-      }).subscribeOn(AndroidSchedulers.mainThread());
-    } else {
-      return submitBehavior(new Behavior<D>(items, Action.SET));
-    }
+    return submitBehavior(new Behavior<D>(items, Action.SET));
   }
 
   public Observable<Void> update(D item, int position) {
@@ -263,6 +251,8 @@ public class ObservableAdapterManager<D> {
 
     final int mDestPos;
 
+    final long createdAt;
+
     public Behavior(D item, int pos, Action action) {
       this(Arrays.asList(item), pos, action, pos);
     }
@@ -284,6 +274,7 @@ public class ObservableAdapterManager<D> {
       mPos = pos;
       mAction = action;
       mDestPos = destPos;
+      createdAt = System.currentTimeMillis();
     }
 
     public Behavior(D item, Action action) {
