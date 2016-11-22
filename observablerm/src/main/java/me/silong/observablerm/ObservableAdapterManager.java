@@ -123,11 +123,22 @@ public class ObservableAdapterManager<D> {
           }
           break;
         case REMOVE:
-          int removeIndex;
+          int removeIndex = -1;
           if (behavior.mPos >= 0) {
             removeIndex = behavior.mPos;
           } else {
-            removeIndex = mItems.indexOf(behavior.mItems.get(0));
+            if (mDataComparable != null) {
+              D removingItem = behavior.mItems.get(0);
+              for (int i = 0; i < mItems.size(); i++) {
+                item = mItems.get(i);
+                if (mDataComparable.areItemsTheSame(removingItem, item)) {
+                  removeIndex = i;
+                  break;
+                }
+              }
+            } else {
+              removeIndex = mItems.indexOf(behavior.mItems.get(0));
+            }
           }
           mItems.remove(removeIndex);
           if (mAdapter != null) {
@@ -199,11 +210,11 @@ public class ObservableAdapterManager<D> {
     return submitBehavior(new Behavior<D>(item, Action.REMOVE));
   }
 
-  public Observable<Void> addAll(List<D> items, int startPos) {
+  public Observable<Void> addAll(List<? extends D> items, int startPos) {
     return submitBehavior(new Behavior<D>(items, startPos, Action.ADD));
   }
 
-  public Observable<Void> addAll(List<D> items) {
+  public Observable<Void> addAll(List<? extends D> items) {
     return submitBehavior(new Behavior<D>(items, Action.ADD));
   }
 
