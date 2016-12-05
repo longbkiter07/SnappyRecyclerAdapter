@@ -13,6 +13,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subjects.BehaviorSubject;
 import rx.subjects.PublishSubject;
 
 /**
@@ -28,7 +29,7 @@ public class ObservableAdapterManager<D> {
 
   private final PublishSubject<Behavior<D>> mProcessingSubject;
 
-  private final PublishSubject<Long> mFinishedSubject;
+  private final BehaviorSubject<Behavior<D>> mFinishedSubject;
 
   @Nullable private RecyclerView.Adapter mAdapter;
 
@@ -38,7 +39,7 @@ public class ObservableAdapterManager<D> {
     mItems = items;
     mDataComparable = dataComparable;
     mProcessingSubject = PublishSubject.create();
-    mFinishedSubject = PublishSubject.create();
+    mFinishedSubject = BehaviorSubject.create();
     mAdapter = adapter;
     init();
   }
@@ -63,7 +64,7 @@ public class ObservableAdapterManager<D> {
         .onBackpressureBuffer()
         .observeOn(Schedulers.computation())
         .concatMap(dBehavior -> processBehaviors(dBehavior).doOnNext(aVoid1 -> {
-          mFinishedSubject.onNext(dBehavior.createdAt);
+          mFinishedSubject.onNext(dBehavior);
         }))
         .subscribe();
   }
@@ -175,23 +176,25 @@ public class ObservableAdapterManager<D> {
   }
 
   private Observable<Void> processBehaviors(Behavior<D> behavior) {
-    if (behavior.mAction == Action.SET) {
-      if (mDataComparable != null && mItems.size() <= MAX_SIZE_TO_CALL_DIFF
-          && behavior.mItems.size() <= MAX_SIZE_TO_CALL_DIFF) {
-        return processSetWithDiffCallback(behavior);
+    return Observable.defer(() -> {
+      if (behavior.mAction == Action.SET) {
+        if (mDataComparable != null && mItems.size() <= MAX_SIZE_TO_CALL_DIFF
+            && behavior.mItems.size() <= MAX_SIZE_TO_CALL_DIFF) {
+          return processSetWithDiffCallback(behavior);
+        } else {
+          return processSetWithNotify(behavior);
+        }
       } else {
-        return processSetWithNotify(behavior);
+        return processSingleOperator(behavior);
       }
-    } else {
-      return processSingleOperator(behavior);
-    }
+    });
   }
 
   private Observable<Void> submitBehavior(Behavior<D> behavior) {
-    return Observable.defer(() -> mFinishedSubject
-        .doOnSubscribe(() -> mProcessingSubject.onNext(behavior))
-        .filter(aLong -> aLong >= behavior.createdAt).take(1)
-        .<Void>map(dBehavior -> null));
+    return mFinishedSubject.filter(dBehavior -> dBehavior == behavior)
+        .take(1)
+        .<Void>map(aLong -> null)
+        .doOnSubscribe(() -> mProcessingSubject.onNext(behavior));
   }
 
   public Observable<Void> add(D item) {
@@ -262,8 +265,6 @@ public class ObservableAdapterManager<D> {
 
     final int mDestPos;
 
-    final long createdAt;
-
     public Behavior(D item, int pos, Action action) {
       this(Arrays.asList(item), pos, action, pos);
     }
@@ -285,7 +286,6 @@ public class ObservableAdapterManager<D> {
       mPos = pos;
       mAction = action;
       mDestPos = destPos;
-      createdAt = System.currentTimeMillis();
     }
 
     public Behavior(D item, Action action) {
