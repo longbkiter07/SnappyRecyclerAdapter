@@ -153,8 +153,9 @@ public class RecyclerViewActivity extends AppCompatActivity {
           mRegularRecyclerViewAdapter.setUserAt(new User("custom_name" + Math.random(), 100, User.Gender.male),
               (int) (Math.random() * mRegularRecyclerViewAdapter.getItemCount() - 1));
         } else {
-          mUserRecyclerViewAdapter.getObservableAdapterManager().update((int) (Math.random() * mUserRecyclerViewAdapter.getItemCount() - 1),
-              new User("custom_name" + Math.random(), 100, User.Gender.male)).subscribe();
+          mUserRecyclerViewAdapter.getObservableAdapterManager().update(
+              new User("custom_name" + Math.random(), 100, User.Gender.male),
+              (int) (Math.random() * mUserRecyclerViewAdapter.getItemCount() - 1)).subscribe();
         }
         break;
     }

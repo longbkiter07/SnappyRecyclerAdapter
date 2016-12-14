@@ -2,6 +2,7 @@ package me.silong.observablerm;
 
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import me.silong.observablerm.callback.ObservableDiffCallback;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
 import rx.subjects.PublishSubject;
@@ -22,6 +24,8 @@ import rx.subjects.PublishSubject;
 public class ObservableAdapterManager<D> {
 
   private static final int MAX_SIZE_TO_CALL_DIFF = 512; //ms
+
+  private static final String TAG = ObservableAdapterManager.class.getSimpleName();
 
   private final List<D> mItems;
 
@@ -48,6 +52,29 @@ public class ObservableAdapterManager<D> {
     this(null, items, dataComparable);
   }
 
+  private static <T> Observable<T> makeObservableSafe(Observable<T> observable) {
+    return createSafeObservable(() -> null)
+        .flatMap(o -> observable);
+  }
+
+  private static <T> Observable<T> createSafeObservable(Func0<T> func) {
+    return Observable.create(subscriber -> {
+      if (!subscriber.isUnsubscribed()) {
+        try {
+          T result = func.call();
+          if (!subscriber.isUnsubscribed()) {
+            subscriber.onNext(result);
+            subscriber.onCompleted();
+          }
+        } catch (Exception e) {
+          if (!subscriber.isUnsubscribed()) {
+            subscriber.onError(e);
+          }
+        }
+      }
+    });
+  }
+
   private void unsubscribe() {
     if (mProcessingSubscription != null && !mProcessingSubscription.isUnsubscribed()) {
       mProcessingSubscription.unsubscribe();
@@ -63,10 +90,15 @@ public class ObservableAdapterManager<D> {
     mProcessingSubscription = mProcessingSubject
         .onBackpressureBuffer()
         .observeOn(Schedulers.computation())
-        .concatMap(dBehavior -> processBehaviors(dBehavior).doOnNext(aVoid1 -> {
-          mFinishedSubject.onNext(dBehavior);
-        }))
-        .subscribe();
+        .concatMap(dBehavior -> processBehaviors(dBehavior)
+            .doOnNext(aVoid1 -> {
+              mFinishedSubject.onNext(dBehavior);
+            }))
+        .subscribe(aVoid -> {
+          Log.w(TAG, "completed event");
+        }, throwable -> {
+          Log.w(TAG, throwable.getMessage(), throwable);
+        });
   }
 
   public void attachTo(RecyclerView.Adapter adapter) {
@@ -74,7 +106,7 @@ public class ObservableAdapterManager<D> {
   }
 
   private Observable<Void> processSetWithDiffCallback(Behavior<D> behavior) {
-    return ObservableDiffCallback.calculate(mDataComparable, new ArrayList<>(mItems), behavior.mItems)
+    return makeObservableSafe(ObservableDiffCallback.calculate(mDataComparable, new ArrayList<>(mItems), behavior.mItems)
         .observeOn(AndroidSchedulers.mainThread())
         .doOnNext(diffResult -> {
           mItems.clear();
@@ -83,23 +115,23 @@ public class ObservableAdapterManager<D> {
             diffResult.dispatchUpdatesTo(mAdapter);
           }
         })
-        .<Void>map(diffResult -> null);
+        .<Void>map(diffResult -> null));
   }
 
   private Observable<Void> processSetWithNotify(Behavior<D> behavior) {
-    return Observable.defer(() -> {
+    return makeObservableSafe(ObservableAdapterManager.<Void>createSafeObservable(() -> {
       mItems.clear();
       mItems.addAll(behavior.mItems);
       if (mAdapter != null) {
         mAdapter.notifyDataSetChanged();
       }
-      return Observable.<Void>just(null);
+      return null;
     })
-        .subscribeOn(AndroidSchedulers.mainThread());
+        .subscribeOn(AndroidSchedulers.mainThread()));
   }
 
   private Observable<Void> processSingleOperator(Behavior<D> behavior) {
-    return Observable.defer(() -> {
+    return ObservableAdapterManager.<Void>createSafeObservable(() -> {
       switch (behavior.mAction) {
         case ADD:
           int size = behavior.mItems.size();
@@ -165,7 +197,7 @@ public class ObservableAdapterManager<D> {
           }
           break;
       }
-      return Observable.<Void>just(null);
+      return null;
     }).subscribeOn(AndroidSchedulers.mainThread());
   }
 
@@ -176,7 +208,7 @@ public class ObservableAdapterManager<D> {
   }
 
   private Observable<Void> processBehaviors(Behavior<D> behavior) {
-    return Observable.defer(() -> {
+    return makeObservableSafe(Observable.defer(() -> {
       if (behavior.mAction == Action.SET) {
         if (mDataComparable != null && mItems.size() <= MAX_SIZE_TO_CALL_DIFF
             && behavior.mItems.size() <= MAX_SIZE_TO_CALL_DIFF) {
@@ -187,7 +219,7 @@ public class ObservableAdapterManager<D> {
       } else {
         return processSingleOperator(behavior);
       }
-    });
+    }));
   }
 
   private Observable<Void> submitBehavior(Behavior<D> behavior) {
