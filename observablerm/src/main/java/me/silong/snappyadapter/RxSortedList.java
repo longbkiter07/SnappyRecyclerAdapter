@@ -1,6 +1,5 @@
 package me.silong.snappyadapter;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -152,20 +151,16 @@ public class RxSortedList<T> {
 
   private class AsyncSortedListCallback extends AsyncSortedList.Callback<T> {
 
-    private final WeakReference<RxSortedListCallback<T>> mRxSortedListCallbackWeakReference;
+    private final RxSortedListCallback<T> mRxSortedListCallback;
 
 
     AsyncSortedListCallback(RxSortedListCallback<T> rxSortedListCallback) {
-      mRxSortedListCallbackWeakReference = new WeakReference<RxSortedListCallback<T>>(rxSortedListCallback);
+      mRxSortedListCallback = rxSortedListCallback;
     }
 
     @Override
     public int compare(T o1, T o2) {
-      RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
-      if (rxSortedListCallback != null) {
-        return rxSortedListCallback.compare(o1, o2);
-      }
-      return 0;
+      return mRxSortedListCallback.compare(o1, o2);
     }
 
     @Override
@@ -174,10 +169,7 @@ public class RxSortedList<T> {
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(tList -> {
             mSyncList.addAll(position, tList);
-            RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
-            if (rxSortedListCallback != null) {
-              rxSortedListCallback.onInserted(position, ts.length);
-            }
+            mRxSortedListCallback.onInserted(position, ts.length);
           });
     }
 
@@ -188,10 +180,7 @@ public class RxSortedList<T> {
           .subscribe(objects -> {
             //remove range http://stackoverflow.com/questions/2289183/why-is-javas-abstractlists-removerange-method-protected
             mSyncList.subList(position, position + count).clear();
-            RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
-            if (rxSortedListCallback != null) {
-              rxSortedListCallback.onRemoved(position, count);
-            }
+            mRxSortedListCallback.onRemoved(position, count);
           });
     }
 
@@ -202,10 +191,7 @@ public class RxSortedList<T> {
           .subscribe(objects -> {
             T t = mSyncList.remove(fromPosition);
             mSyncList.add(toPosition, t);
-            RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
-            if (rxSortedListCallback != null) {
-              rxSortedListCallback.onMoved(fromPosition, toPosition);
-            }
+            mRxSortedListCallback.onMoved(fromPosition, toPosition);
           });
     }
 
@@ -217,29 +203,18 @@ public class RxSortedList<T> {
             for (int i = 0; i < ts.length; i++) {
               mSyncList.set(position + i, ts[i]);
             }
-            RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
-            if (rxSortedListCallback != null) {
-              rxSortedListCallback.onChanged(position, ts.length);
-            }
+            mRxSortedListCallback.onChanged(position, ts.length);
           });
     }
 
     @Override
     public boolean areContentsTheSame(T oldItem, T newItem) {
-      RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
-      if (rxSortedListCallback != null) {
-        return rxSortedListCallback.areContentsTheSame(oldItem, newItem);
-      }
-      return false;
+      return mRxSortedListCallback.areContentsTheSame(oldItem, newItem);
     }
 
     @Override
     public boolean areItemsTheSame(T item1, T item2) {
-      RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
-      if (rxSortedListCallback != null) {
-        return rxSortedListCallback.areItemsTheSame(item1, item2);
-      }
-      return false;
+      return mRxSortedListCallback.areItemsTheSame(item1, item2);
     }
   }
 }

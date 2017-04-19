@@ -10,7 +10,7 @@ android {
   }
   defaultConfig {
     applicationId "com.silong.snappyrecycleradapter"
-    minSdkVersion 15
+    minSdkVersion 16
     targetSdkVersion 24
     versionCode 1
     versionName "1.0"
@@ -28,5 +28,8 @@ dependencies {
   testCompile 'junit:junit:4.12'
   compile 'com.android.support:appcompat-v7:24.2.0'
   compile 'com.android.support:recyclerview-v7:24.2.0'
+  debugCompile "com.github.brianPlummer:tinydancer:0.1.1"
+  releaseCompile "com.github.brianPlummer:tinydancer-noop:0.1.1"
+  testCompile "com.github.brianPlummer:tinydancer-noop:0.1.1"
   compile project(path: ':observablerm')
 }

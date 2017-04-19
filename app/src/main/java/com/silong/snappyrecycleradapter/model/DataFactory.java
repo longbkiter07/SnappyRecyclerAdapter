@@ -12,7 +12,7 @@ import rx.schedulers.Schedulers;
  */
 public class DataFactory {
 
-  public static final int CHUNK = 4;
+  public static final int CHUNK = 10000;
 
   private DataFactory() {
 
@@ -22,7 +22,8 @@ public class DataFactory {
     return Observable.defer(() -> {
       List<User> users = new ArrayList<>(size);
       for (int i = 0; i < size; i++) {
-        users.add(new User("User_" + i, (int) (Math.random() * 30 + 20),
+        int rand = (int) (Math.random() * 100000);
+        users.add(new User("User_" + i, "User_" + rand, (int) (Math.random() * 30 + 20),
             Math.random() < 0.5 ? User.Gender.male : User.Gender.female));
       }
       return Observable.just(users);
@@ -35,7 +36,8 @@ public class DataFactory {
     return Observable.defer(() -> {
       List<User> users = new ArrayList<>(size);
       for (int i = begin; i < begin + size; i++) {
-        users.add(new User("User_" + i, (int) (Math.random() * 30 + 20),
+        int rand = (int) (Math.random() * 10000);
+        users.add(new User("User_" + i, "User_" + rand, (int) (Math.random() * 30 + 20),
             Math.random() < 0.5 ? User.Gender.male : User.Gender.female));
       }
       return Observable.just(users);
