@@ -1,4 +1,4 @@
-package me.silong.v2.observablerm;
+package me.silong.snappyadapter;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -51,6 +51,13 @@ class AsyncSortedList<T> {
     mSize = 0;
   }
 
+  public AsyncSortedList(Class<T> klass, AsyncSortedList.Callback<T> callback, List<T> initialSortedList) {
+    mTClass = klass;
+    mData = initialSortedList.toArray((T[]) Array.newInstance(mTClass, initialSortedList.size()));
+    mCallback = callback;
+    mSize = initialSortedList.size();
+  }
+
   public int size() {
     return mSize;
   }
@@ -61,7 +68,7 @@ class AsyncSortedList<T> {
   }
 
   public List<T> getData() {
-    return Arrays.asList(mData);
+    return Arrays.asList(mData).subList(0, mSize);
   }
 
   public void addAll(T[] items, boolean mayModifyInput) {
@@ -430,6 +437,12 @@ class AsyncSortedList<T> {
     Arrays.fill(mData, 0, prevSize, null);
     mSize = 0;
     mCallback.onRemoved(0, prevSize);
+  }
+
+  //TODO refactor this
+  public void set(List<T> items) {
+    mData = items.toArray((T[]) Array.newInstance(mTClass, items.size()));
+    mSize = items.size();
   }
 
   public static abstract class Callback<T2> implements Comparator<T2> {

@@ -1,9 +1,10 @@
-package me.silong.v2.observablerm;
+package me.silong.snappyadapter;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -38,6 +39,14 @@ public class RxSortedList<T> {
     mRxSortedListCallback = rxSortedListCallback;
   }
 
+  public RxSortedList(Class<T> klass, RxSortedListCallback<T> rxSortedListCallback, List<T> initialList) {
+    mSyncList = new ArrayList<T>(initialList);
+    Collections.sort(mSyncList, rxSortedListCallback);
+    mSyncList = new ArrayList<T>(initialList);
+    mSortedList = new AsyncSortedList<T>(klass, new AsyncSortedListCallback(rxSortedListCallback), mSyncList);
+    mRxSortedListCallback = rxSortedListCallback;
+  }
+
   public Observable<Void> clear() {
     return Observable.<Void>fromCallable(() -> {
       mSortedList.clear();
@@ -46,7 +55,13 @@ public class RxSortedList<T> {
   }
 
   public Observable<Void> set(List<T> items) {
-    return Observable.defer(() -> RxDiffCallback.calculate(mRxSortedListCallback, mSortedList.getData(), items)
+    return Observable.defer(() -> {
+      Collections.sort(items, mRxSortedListCallback);
+      return RxDiffCallback.calculate(mRxSortedListCallback, mSortedList.getData(), items);
+    })
+        .doOnNext(diffResultListPair -> {
+          mSortedList.set(items);
+        })
         .subscribeOn(Schedulers.from(sExecutor))
         .observeOn(AndroidSchedulers.mainThread())
         .doOnNext(diffResultListPair -> {
@@ -54,7 +69,7 @@ public class RxSortedList<T> {
           mSyncList.addAll(diffResultListPair.second);
           diffResultListPair.first.dispatchUpdatesTo(mRxSortedListCallback);
         })
-        .map(diffResult -> null));
+        .map(diffResult -> null);
   }
 
   public Observable<Integer> add(T item) {
@@ -79,6 +94,38 @@ public class RxSortedList<T> {
   public Observable<Void> addAll(Collection<T> items) {
     return Observable.<Void>fromCallable(() -> {
       mSortedList.addAll(items);
+      return null;
+    }).subscribeOn(Schedulers.from(sExecutor));
+  }
+
+  public Observable<Void> remove(T item) {
+    return Observable.<Void>fromCallable(() -> {
+      mSortedList.remove(item);
+      return null;
+    }).subscribeOn(Schedulers.from(sExecutor));
+  }
+
+  public Observable<Void> removeAt(int index) {
+    return Observable.<Void>fromCallable(() -> {
+      mSortedList.removeItemAt(index);
+      return null;
+    }).subscribeOn(Schedulers.from(sExecutor));
+  }
+
+  public Observable<Void> remove(int index, int count) {
+    return Observable.<Void>fromCallable(() -> {
+      for (int i = 0; i < count; i++) {
+        mSortedList.removeItemAt(i + index);
+      }
+      return null;
+    }).subscribeOn(Schedulers.from(sExecutor));
+  }
+
+  public Observable<Void> remove(Collection<T> collection) {
+    return Observable.<Void>fromCallable(() -> {
+      for (T t : collection) {
+        mSortedList.remove(t);
+      }
       return null;
     }).subscribeOn(Schedulers.from(sExecutor));
   }
@@ -126,7 +173,7 @@ public class RxSortedList<T> {
       Observable.fromCallable(() -> Arrays.asList(ts))
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(tList -> {
-            mSyncList.addAll(tList);
+            mSyncList.addAll(position, tList);
             RxSortedListCallback<T> rxSortedListCallback = mRxSortedListCallbackWeakReference.get();
             if (rxSortedListCallback != null) {
               rxSortedListCallback.onInserted(position, ts.length);

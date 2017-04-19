@@ -25,23 +25,15 @@ public class RecyclerViewActivity extends AppCompatActivity {
 
   private static final int MODE_REGULAR = 2;
 
-  private static final int MODE_LINKED_LIST = 0;
-
-  private static final int MODE_ARRAY_LIST = 1;
+  private static final int MODE_RXSORTED_LIST = 0;
 
   private UserRecyclerViewAdapter mUserRecyclerViewAdapter;
 
   private RegularRecyclerViewAdapter mRegularRecyclerViewAdapter;
 
-  public static Intent newFastLinkedListIntent(Context context) {
+  public static Intent newRxSortedList(Context context) {
     Intent intent = new Intent(context, RecyclerViewActivity.class);
-    intent.putExtra(MODE, MODE_LINKED_LIST);
-    return intent;
-  }
-
-  public static Intent newFastArrayListIntent(Context context) {
-    Intent intent = new Intent(context, RecyclerViewActivity.class);
-    intent.putExtra(MODE, MODE_ARRAY_LIST);
+    intent.putExtra(MODE, MODE_RXSORTED_LIST);
     return intent;
   }
 
@@ -64,14 +56,9 @@ public class RecyclerViewActivity extends AppCompatActivity {
           mRegularRecyclerViewAdapter = new RegularRecyclerViewAdapter(users);
           recyclerView.setAdapter(mRegularRecyclerViewAdapter);
           break;
-        case MODE_LINKED_LIST:
-          mUserRecyclerViewAdapter = UserRecyclerViewAdapter.newLinkedListAdapter();
-          mUserRecyclerViewAdapter.getObservableAdapterManager().setItems(users).subscribe();
-          recyclerView.setAdapter(mUserRecyclerViewAdapter);
-          break;
-        case MODE_ARRAY_LIST:
-          mUserRecyclerViewAdapter = UserRecyclerViewAdapter.newArrayListAdapter(DataFactory.CHUNK);
-          mUserRecyclerViewAdapter.getObservableAdapterManager().setItems(users).subscribe();
+        case MODE_RXSORTED_LIST:
+          mUserRecyclerViewAdapter = UserRecyclerViewAdapter.newAdapter();
+          mUserRecyclerViewAdapter.getObservableAdapterManager().set(users).subscribe();
           recyclerView.setAdapter(mUserRecyclerViewAdapter);
           break;
       }
@@ -103,7 +90,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
         } else {
           DataFactory.fakeUsersToAddOrUpdate(mUserRecyclerViewAdapter.getItemCount(), DataFactory.CHUNK)
               .flatMap(users -> mUserRecyclerViewAdapter.getObservableAdapterManager()
-                  .addAll(users, mUserRecyclerViewAdapter.getItemCount() / 2))
+                  .addAll(users))
               .subscribe();
         }
         break;
@@ -132,7 +119,8 @@ public class RecyclerViewActivity extends AppCompatActivity {
         if (mRegularRecyclerViewAdapter != null) {
           mRegularRecyclerViewAdapter.remove((int) (Math.random() * mRegularRecyclerViewAdapter.getItemCount() - 1));
         } else {
-          mUserRecyclerViewAdapter.getObservableAdapterManager().remove((int) (Math.random() * mUserRecyclerViewAdapter.getItemCount() - 1))
+          mUserRecyclerViewAdapter.getObservableAdapterManager()
+              .removeAt((int) (Math.random() * mUserRecyclerViewAdapter.getItemCount() - 1))
               .subscribe();
         }
         break;
@@ -144,7 +132,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
               });
         } else {
           DataFactory.fakeUsersToSet(DataFactory.CHUNK)
-              .flatMap(users -> mUserRecyclerViewAdapter.getObservableAdapterManager().setItems(users))
+              .flatMap(users -> mUserRecyclerViewAdapter.getObservableAdapterManager().set(users))
               .subscribe();
         }
         break;
@@ -153,9 +141,9 @@ public class RecyclerViewActivity extends AppCompatActivity {
           mRegularRecyclerViewAdapter.setUserAt(new User("custom_name" + Math.random(), 100, User.Gender.male),
               (int) (Math.random() * mRegularRecyclerViewAdapter.getItemCount() - 1));
         } else {
-          mUserRecyclerViewAdapter.getObservableAdapterManager().update(
-              new User("custom_name" + Math.random(), 100, User.Gender.male),
-              (int) (Math.random() * mUserRecyclerViewAdapter.getItemCount() - 1)).subscribe();
+          mUserRecyclerViewAdapter.getObservableAdapterManager().updateItemAt(
+              (int) (Math.random() * mUserRecyclerViewAdapter.getItemCount() - 1),
+              new User("custom_name" + Math.random(), 100, User.Gender.male)).subscribe();
         }
         break;
     }

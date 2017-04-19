@@ -1,4 +1,4 @@
-package me.silong.v2.observablerm;
+package me.silong.snappyadapter;
 
 import android.support.v7.util.SortedList;
 

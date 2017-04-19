@@ -22,7 +22,7 @@ ext {
       minSdkVersion    : 15,
       targetSdkVersion : 23,
       versionCode      : 25,
-      versionName      : "0.3.4"
+      versionName      : "1.0.0-beta"
   ]
 
   bintray = [
@@ -35,8 +35,8 @@ ext {
 
       libraryDescription: "Observable RecyclerViewAdapter Manager",
 
-      siteUrl           : "https://github.com/longbkiter07/ObservableRecyclerAdapter/",
-      gitUrl            : "git@github.com:longbkiter07/ObservableRecyclerAdapter.git",
+      siteUrl           : "https://github.com/longbkiter07/SnappyRecyclerAdapter/",
+      gitUrl            : "git@github.com:longbkiter07/SnappyRecyclerAdapter.git",
 
       libraryVersion    : rootProject.ext.android["versionName"],
 
