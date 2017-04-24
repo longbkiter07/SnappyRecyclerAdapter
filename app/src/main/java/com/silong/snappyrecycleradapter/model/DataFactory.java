@@ -12,7 +12,7 @@ import rx.schedulers.Schedulers;
  */
 public class DataFactory {
 
-  public static final int CHUNK = 10000;
+  public static final int CHUNK = 10;
 
   private DataFactory() {
 

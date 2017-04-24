@@ -3,7 +3,7 @@ package me.silong.snappyadapter;
 import android.support.v7.widget.RecyclerView;
 
 /**
- * Created by SILONG on 4/19/17.
+ * Created by SILONG on 4/24/17.
  */
 
 public abstract class RxRecyclerViewCallback<T> extends RxSortedListCallback<T> {
@@ -14,9 +14,10 @@ public abstract class RxRecyclerViewCallback<T> extends RxSortedListCallback<T> 
     mAdapter = adapter;
   }
 
+
   @Override
   public void onChanged(int position, int count) {
-    mAdapter.notifyItemRangeChanged(position, count);
+    mAdapter.notifyItemChanged(position, count);
   }
 
   @Override

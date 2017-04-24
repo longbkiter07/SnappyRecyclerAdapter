@@ -142,7 +142,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
           mSyncAdapter.remove((int) (Math.random() * mSyncAdapter.getItemCount() - 1));
         } else {
           mRxUserRecyclerViewAdapter.getObservableAdapterManager()
-              .removeAt((int) (Math.random() * mRxUserRecyclerViewAdapter.getItemCount() - 1))
+              .removeItemAt((int) (Math.random() * mRxUserRecyclerViewAdapter.getItemCount() - 1))
               .subscribe();
         }
         break;

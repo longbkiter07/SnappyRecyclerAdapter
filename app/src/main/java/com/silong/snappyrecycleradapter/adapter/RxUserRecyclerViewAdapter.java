@@ -60,6 +60,6 @@ public class RxUserRecyclerViewAdapter extends RecyclerView.Adapter<ItemViewHold
 
   @Override
   public void onBindViewHolder(ItemViewHolder holder, int position) {
-    holder.bind(mUserRxSortedList.getItemAt(position));
+    holder.bind(mUserRxSortedList.get(position));
   }
 }
