@@ -23,7 +23,7 @@ class SnappyDiffCallback<D> extends DiffUtil.Callback {
     mNewDataLength = newDataLength;
   }
 
-  public static <D> Pair<DiffUtil.DiffResult, D[]> calculate(RxSortedListCallback<D> callback, D[] oldData, D[] newData,
+  static <D> Pair<DiffUtil.DiffResult, D[]> calculate(RxSortedListCallback<D> callback, D[] oldData, D[] newData,
       int oldDataLength, int newDataLength) {
     return Pair.create(DiffUtil.calculateDiff(new SnappyDiffCallback<>(callback, oldData, newData, oldDataLength, newDataLength)), newData);
   }

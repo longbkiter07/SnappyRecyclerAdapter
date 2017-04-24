@@ -6,7 +6,7 @@ import android.support.v7.util.ListUpdateCallback;
 import java.util.Comparator;
 
 /**
- * The class that controls the behavior of the {@link android.support.v7.util.SortedList}.
+ * The class that controls the behavior of the {@link me.silong.snappyadapter.RxSortedList}.
  * <p>
  * It defines how items should be sorted and how duplicates should be handled.
  * <p>
@@ -50,8 +50,7 @@ public abstract class RxSortedListCallback<T2> implements Comparator<T2>, ListUp
    * so
    * that you can change its behavior depending on your UI.
    * <p>
-   * For example, if you are using SortedList with a {@link android.support.v7.widget.RecyclerView.Adapter
-   * RecyclerView.Adapter}, you should
+   * For example, if you are using SortedList with a RecyclerView.Adapter, you should
    * return whether the items' visual representations are the same or not.
    *
    * @param oldItem The previous representation of the object.
@@ -84,10 +83,10 @@ public abstract class RxSortedListCallback<T2> implements Comparator<T2>, ListUp
    * <p>
    * If consecutive changes in the SortedList are not suitable for batching, BatchingCallback
    * dispatches them as soon as such case is detected. After your edits on the SortedList is
-   * complete, you <b>must</b> always call {@link android.support.v7.util.SortedList.BatchedCallback#dispatchLastEvent()} to flush
+   * complete, you <b>must</b> always call {@link me.silong.snappyadapter.RxSortedListCallback.BatchedCallback#dispatchLastEvent()} to flush
    * all changes to the Callback.
    */
-  public static class BatchedCallback<T2> extends RxSortedListCallback<T2> {
+  public static final class BatchedCallback<T2> extends RxSortedListCallback<T2> {
 
     final RxSortedListCallback<T2> mWrappedCallback;
 

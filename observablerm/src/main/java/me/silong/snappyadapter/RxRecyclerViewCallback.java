@@ -14,7 +14,6 @@ public abstract class RxRecyclerViewCallback<T> extends RxSortedListCallback<T> 
     mAdapter = adapter;
   }
 
-
   @Override
   public void onChanged(int position, int count) {
     mAdapter.notifyItemChanged(position, count);
