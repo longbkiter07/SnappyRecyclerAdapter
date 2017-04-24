@@ -21,10 +21,9 @@ public class MainActivity extends AppCompatActivity {
     ListView listView = (ListView) findViewById(android.R.id.list);
     listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
         new String[]{
-            "Fast RecyclerView with ArrayList",
-            "Fast RecyclerView with LinkedList",
-            "Regular RecyclerView",
-            "Regular ListView"
+            "RxSortedList",
+            "SortedList",
+            "RegularList"
         }));
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
@@ -33,16 +32,13 @@ public class MainActivity extends AppCompatActivity {
         switch (i) {
           default:
           case 0:
-            intent = RecyclerViewActivity.newFastArrayListIntent(MainActivity.this);
+            intent = RecyclerViewActivity.newRxSortedList(MainActivity.this, listView.getItemAtPosition(i).toString());
             break;
           case 1:
-            intent = RecyclerViewActivity.newFastLinkedListIntent(MainActivity.this);
+            intent = RecyclerViewActivity.newSortedIntent(MainActivity.this, listView.getItemAtPosition(i).toString());
             break;
           case 2:
-            intent = RecyclerViewActivity.newRegularIntent(MainActivity.this);
-            break;
-          case 3:
-            intent = new Intent(MainActivity.this, ListViewActivity.class);
+            intent = RecyclerViewActivity.newRegularIntent(MainActivity.this, listView.getItemAtPosition(i).toString());
             break;
         }
         startActivity(intent);

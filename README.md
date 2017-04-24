@@ -1,14 +1,14 @@
 # SnappyRecyclerAdapter
 
-This library helps you to manage `RecyclerViewAdapter` easier. 
+This library helps you to manage `RecyclerViewAdapter` easier. This library is very useful for rendering a sorted data in real time (For example: chat application)
 
 # Features
 
-* Calling `notifyDataSetChanges`, `notifyItemInserted`, `notifyItemChanged`... and apply [DiffUtil] (https://developer.android.com/reference/android/support/v7/util/DiffUtil.html) automatically so you don't care about them anymore.
-* Calling `DiffUtil` in background thread so that the ui does not lag.
+* Calling `notifyDataSetChanges`, `notifyItemInserted`, `notifyItemChanged`... automatically
+* Applying both `SortedList` and `DiffUtil`
+* Calling `DiffUtil` in background thread so that the ui does not lag
 * Queueing events to keep data is consistent.
 * Observable method so that we can catch the callback to do next action.
-* Supporting LinkedList, ArrayList for reasonable usage.
 
 # Usage
 
@@ -25,35 +25,38 @@ compile 'com.android.support:recyclerview-v7:24.+'
 
 ```
 
-Code example: read [here] (https://github.com/longbkiter07/SnappyRecyclerAdapter/blob/master/app/src/main/java/com/silong/snappyrecycleradapter/adapter/UserRecyclerViewAdapter.java)
+Code example: please read sample app
 
-## Create your RecyclerList:
-
-```
-List<T> recyclerList = new ArrayList<>();
-```
-Or
-```
-List<T> recyclerList = new RecyclerLinkedList<>();
-```
-`RecyclerLinkedList` is a list that helps you to improve performance for `get(int index)` method.
 ## Create your RecyclerViewAdapter:
 
 ```
 public class MyAdapter<VH> extends RecyclerViewAdapter<VH> {
-    private final ObservableAdapterManager<User> mObservableAdapterManager;
-    public MyRecyclerViewAdapter(List<User> items) {
-      mObservableAdapterManager = new ObservableAdapterManager<User>(this, items, null);
+    private final RxSortedList<T> mRxSortedList;
+    public MyRecyclerViewAdapter() {
+      mRxSortedList = new RxSortedList<>(T.class, new RxRecyclerViewCallback<T>(this) {
+            @Override
+            public boolean areContentsTheSame(T oldData, T newData) {
+              return //return whether content of oldData and newData are the same
+            }
+      
+            @Override
+            public boolean areItemsTheSame(T oldData, T newData) {
+              return //return whether oldData and newData are the same (checking object id is recommended)
+            }
+      
+            @Override
+            public int compare(T o1, T o2) {
+              return //sort order. 
+            }
+          });
     }
     @Override
     public int getItemCount() {
-      return mObservableAdapterManager.getItemCount();
+      return mRxSortedList.size();
     }
     ...
 }
 ```
-
-If you want to use `DiffUtil`, you would implement `DataComparable` to define differences between 2 items. Otherwise, you can pass `null` value.
 
 ## Add item:
 
